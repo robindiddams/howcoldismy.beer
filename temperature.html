@@ -7,21 +7,22 @@
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <style>
       body {
-        font-family: monospace;
+        font-family: sans-serif;
         background: linear-gradient(135deg, #5a7a9a 0%, #7a6a9a 50%, #6a8a8a 100%);
         background-attachment: fixed;
         min-height: 100vh;
         color: #fff;
-        max-width: 640px;
+        max-width: 560px;
         margin: 0 auto;
-        padding: 16px;
+        padding: 24px 16px;
       }
       h1 { font-size: 1.4em; }
       a { color: #aaf; }
       .big { font-size: 3em; font-weight: bold; }
       .msg { font-size: 1.1em; }
-      .small { font-size: 0.8em; opacity: 0.6; }
+      .small { font-size: 0.85em; opacity: 0.6; }
       .err { color: #fbb; }
+      .preset-label { font-size: 1.6em; font-weight: bold; }
     </style>
   </head>
   <body x-data="tempPage()">
@@ -35,7 +36,8 @@
     </div>
 
     <div x-show="!loading && !error">
-      <div class="big" x-text="tempDisplay"></div>
+      <div x-show="preset" class="preset-label" x-text="presetLabel"></div>
+      <div x-show="!preset" class="big" x-text="tempDisplay"></div>
       <p class="msg" x-text="tempMessage"></p>
       <p class="small">last updated <span x-text="lastUpdated"></span></p>
     </div>
@@ -45,7 +47,7 @@
     </div>
 
     <div x-show="!loading && !error && temperature === null">
-      <p>No temperature submitted yet. Claim or use your token on the <a href="/">homepage</a>.</p>
+      <p>No checkin yet. Claim or use your token on the <a href="/">homepage</a>.</p>
     </div>
 
     <p class="small" style="margin-top:16px;">auto-refreshes every 5 seconds -- powered by beer -- howcoldismy.beer</p>
@@ -56,12 +58,17 @@
           username: "",
           temperature: null,
           unit: "F",
+          preset: null,
           loading: true,
           error: "",
           lastUpdated: "",
           get tempDisplay() {
             if (this.temperature === null) return "--";
             return this.temperature + "°" + this.unit;
+          },
+          get presetLabel() {
+            var labels = { "super-chill": "Super chill", "frigid": "Absolutely Frigid", "damn-cold": "Damn Cold" };
+            return labels[this.preset] || "";
           },
           get tempMessage() {
             if (this.temperature === null) return "";
@@ -86,6 +93,7 @@
               if (!res.ok) { this.error = data.error || "Could not load temperature."; this.loading = false; return; }
               this.temperature = data.temperature;
               this.unit = data.unit || "F";
+              this.preset = data.preset || null;
               if (data.lastSeen) { var d = new Date(data.lastSeen); this.lastUpdated = d.toLocaleString(); }
               this.error = "";
             } catch (e) { this.error = "Network error."; }

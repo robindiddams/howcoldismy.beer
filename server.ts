@@ -8,6 +8,7 @@ interface UserRecord {
   token: string;
   temperature: number | null;
   unit: "C" | "F";
+  preset: string | null; // e.g. "super-chill", "frigid", "damn-cold"
   lastSeen: number; // epoch ms
   claimedAt: number;
 }
@@ -20,11 +21,17 @@ interface DataShape {
 const DATA_FILE = "data.json";
 const TOKEN_EXPIRY_MS = 8 * 24 * 60 * 60 * 1000; // 8 days
 
+// Preset temperature vibes
+const PRESETS: Record<string, { label: string; temp: number; unit: "F" }> = {
+  "super-chill": { label: "Super chill", temp: 40, unit: "F" },
+  "frigid": { label: "Absolutely Frigid", temp: 28, unit: "F" },
+  "damn-cold": { label: "Damn Cold", temp: 33, unit: "F" },
+};
+
 function loadData(): DataShape {
   try {
     if (!existsSync(DATA_FILE)) return { _counter: 0, users: {} };
     const raw = JSON.parse(readFileSync(DATA_FILE, "utf-8"));
-    // migrate old format (flat record map)
     if (!raw.users) return { _counter: raw._counter || 0, users: raw };
     return raw;
   } catch {
@@ -80,7 +87,7 @@ Bun.serve({
 
         const token = randomToken();
         const now = Date.now();
-        data.users[username] = { token, temperature: null, unit: "F", lastSeen: now, claimedAt: now };
+        data.users[username] = { token, temperature: null, unit: "F", preset: null, lastSeen: now, claimedAt: now };
         saveData(data);
         return Response.json({ username, token, message: "Username claimed! Keep your token safe." }, { status: 201 });
       },
@@ -90,11 +97,21 @@ Bun.serve({
       POST: async (req: Request) => {
         const body = await req.json().catch(() => ({}));
         const token = (body.token || "").toString();
-        const temp = Number(body.temperature);
         const unit: "C" | "F" = body.unit === "C" ? "C" : "F";
+        const preset = (body.preset || "").toString() || null;
 
         if (!token) return Response.json({ error: "Missing token." }, { status: 401 });
-        if (isNaN(temp)) return Response.json({ error: "Invalid temperature." }, { status: 400 });
+
+        let temp: number;
+        let presetId: string | null = null;
+
+        if (preset && PRESETS[preset]) {
+          temp = PRESETS[preset].temp;
+          presetId = preset;
+        } else {
+          temp = Number(body.temperature);
+          if (isNaN(temp)) return Response.json({ error: "Invalid temperature." }, { status: 400 });
+        }
 
         const data = pruneExpired(loadData());
         const entry = Object.entries(data.users).find(([_, r]) => r.token === token);
@@ -103,11 +120,12 @@ Bun.serve({
         const [username, rec] = entry;
         rec.temperature = temp;
         rec.unit = unit;
+        rec.preset = presetId;
         rec.lastSeen = Date.now();
         data._counter = (data._counter || 0) + 1;
         saveData(data);
 
-        return Response.json({ username, temperature: rec.temperature, unit: rec.unit, message: "Temperature updated!" });
+        return Response.json({ username, temperature: rec.temperature, unit: rec.unit, preset: presetId, message: "Checkin logged!" });
       },
     },
 
@@ -117,7 +135,7 @@ Bun.serve({
         const data = pruneExpired(loadData());
         const rec = data.users[username];
         if (!rec) return Response.json({ error: "User not found." }, { status: 404 });
-        return Response.json({ username, temperature: rec.temperature, unit: rec.unit, lastSeen: rec.lastSeen, claimedAt: rec.claimedAt });
+        return Response.json({ username, temperature: rec.temperature, unit: rec.unit, preset: rec.preset, lastSeen: rec.lastSeen, claimedAt: rec.claimedAt });
       },
     },
 
@@ -136,7 +154,7 @@ Bun.serve({
             else if (secs < 3600) ago = Math.floor(secs / 60) + "m ago";
             else if (secs < 86400) ago = Math.floor(secs / 3600) + "h ago";
             else ago = Math.floor(secs / 86400) + "d ago";
-            return { username, temperature: r.temperature, unit: r.unit, ago };
+            return { username, temperature: r.temperature, unit: r.unit, preset: r.preset, ago };
           });
         return Response.json(recent);
       },
