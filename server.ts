@@ -1,5 +1,13 @@
 import { readFileSync, writeFileSync, existsSync } from "fs";
 import { randomToken } from "./ecoji";
+import INDEX_HTML_FILE from "./index.html" with { type: "file" };
+import TEMP_HTML_FILE from "./temperature.html" with { type: "file" };
+import LLMS_TXT_FILE from "./llms.txt" with { type: "file" };
+
+// Read embedded files at startup into strings for serving as Responses
+const INDEX_HTML_STR = readFileSync(INDEX_HTML_FILE, "utf-8");
+const TEMP_HTML_STR = readFileSync(TEMP_HTML_FILE, "utf-8");
+const LLMS_TXT_STR = readFileSync(LLMS_TXT_FILE, "utf-8");
 
 // --- Data persistence ---
 // TODO: migrate to SQLite (e.g. bun:sqlite) for better concurrency & durability
@@ -18,7 +26,7 @@ interface DataShape {
   users: Record<string, UserRecord>;
 }
 
-const DATA_FILE = "data.json";
+const DATA_FILE = process.env.DATA_FILE || "data.json";
 const TOKEN_EXPIRY_MS = 8 * 24 * 60 * 60 * 1000; // 8 days
 
 // Preset temperature vibes
@@ -56,10 +64,10 @@ function pruneExpired(data: DataShape): DataShape {
   return data;
 }
 
-// --- Preload static assets ---
-const INDEX_HTML = Bun.file("index.html");
-const TEMP_HTML = Bun.file("temperature.html");
-const LLMS_TXT = Bun.file("llms.txt");
+// --- Preload static assets (embedded in binary) ---
+const INDEX_HTML = new Response(INDEX_HTML_STR, { headers: { "Content-Type": "text/html" } });
+const TEMP_HTML = new Response(TEMP_HTML_STR, { headers: { "Content-Type": "text/html" } });
+const LLMS_TXT = new Response(LLMS_TXT_STR, { headers: { "Content-Type": "text/plain" } });
 
 Bun.serve({
   port: 3000,

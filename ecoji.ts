@@ -6,24 +6,14 @@
 // Auto-generated from emojisV2.txt
 // prettier-ignore
 import { readFileSync } from "fs";
+import EMOJIS_PATH from "./emojisV2.txt" with { type: "file" };
 
 // Load the V2 emoji mapping at startup
-// The file is fetched at build time — see scripts/fetch-emojis.sh
-// Falls back to generating from the ecoji-js V1 set if not available
-
-// Simple inline V2 encoder:
-// 5 bytes → 4 emojis (no padding when input is multiple of 5)
-// We use 10 bytes → 8 emojis for tokens (no padding)
+// Embedded in the binary via `with { type: "file" }`
 
 const EMOJIS_V2: string[] = (() => {
-  try {
-    const text = readFileSync("emojisV2.txt", "utf-8");
-    return text.trim().split("\n").map((s: string) => String.fromCodePoint(parseInt(s.trim(), 16)));
-  } catch {
-    // Fallback: we'll fetch it in a build step
-    // For now, throw so we know to run the fetch script
-    throw new Error("emojisV2.txt not found. Run: bun run scripts/fetch-emojis.ts");
-  }
+  const text = readFileSync(EMOJIS_PATH, "utf-8");
+  return text.trim().split("\n").map((s: string) => String.fromCodePoint(parseInt(s.trim(), 16)));
 })();
 
 export function encode(data: Uint8Array): string {
