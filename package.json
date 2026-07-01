@@ -1,1 +1,7 @@
-{}
+{
+  "scripts": {
+    "build": "bun build --compile server.ts --outfile howcoldismybeer",
+    "start": "bun run server.ts",
+    "install:service": "sudo ./install.sh"
+  }
+}
