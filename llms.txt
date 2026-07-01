@@ -1,0 +1,54 @@
+# howcoldismy.beer
+
+A website that tells you how cold your beer is. Users claim a username, submit their beer's temperature via API, and share a public link showing their current beer temperature in real-time.
+
+## How it works
+
+1. Claim a username via POST /api/claim — receive a token.
+2. Submit your beer's temperature via POST /api/temperature with your token.
+3. Share your page at /t/<username> — it auto-refreshes every 5 seconds.
+4. Anyone can check your temperature via GET /api/temperature/<username>.
+
+## API Endpoints
+
+### POST /api/claim
+Claim a unique username. Usernames are 2-32 chars, lowercase letters, numbers, hyphens, underscores.
+- Request body: {"username": "yourname"}
+- Success (201): {"username": "yourname", "token": "<uuid>", "message": "..."}
+- Conflict (409): {"error": "Username already claimed."}
+- The token is permanent but expires if unused for more than 8 days. Activity (submitting a temperature) resets the expiry timer.
+
+### POST /api/temperature
+Submit a temperature reading for your beer. Requires a valid token.
+- Request body: {"token": "<your-token>", "temperature": 38.5, "unit": "F"}
+- unit can be "F" (Fahrenheit) or "C" (Celsius). Defaults to "F".
+- Success (200): {"username": "yourname", "temperature": 38.5, "unit": "F", "message": "Temperature updated!"}
+- Invalid token (403): {"error": "Invalid or expired token."}
+
+### GET /api/temperature/<username>
+Get the current temperature for a user.
+- Success (200): {"username": "yourname", "temperature": 38.5, "unit": "F", "lastSeen": 1234567890, "claimedAt": 1234567890}
+- Not found (404): {"error": "User not found."}
+- If temperature is null, the user has claimed their name but not yet submitted a reading.
+
+### GET /t/<username>
+Human-readable temperature page. Same HTML for all users; Alpine.js fetches data from the API on load and auto-refreshes every 5 seconds. Shows a fun message based on how cold the beer actually is.
+
+## Pages
+
+- / — Homepage with claim form and temperature submission form.
+- /t/<username> — Public temperature page for a specific user.
+- /llms.txt — This file (also serves as the API reference).
+
+## Tech Stack
+
+- Bun HTTP server (server.ts)
+- Static HTML + Alpine.js (CDN), no CSS framework
+- data.json for persistence (JSON file storage)
+- No build step, no bundler
+
+## Notes
+
+- Data is stored in data.json. Token activity resets an 8-day inactivity expiry timer.
+- The server runs on port 3000 by default: `bun run server.ts`
+- Blue/purple gradient color scheme, consistent across all pages.

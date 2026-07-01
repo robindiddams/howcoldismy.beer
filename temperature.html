@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>howcoldismy.beer</title>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <style>
+      body {
+        font-family: sans-serif;
+        background: linear-gradient(135deg, #5a7a9a 0%, #7a6a9a 50%, #6a8a8a 100%);
+        background-attachment: fixed;
+        min-height: 100vh;
+        color: #fff;
+        max-width: 560px;
+        margin: 0 auto;
+        padding: 24px 16px;
+      }
+      a { color: #aaf; }
+      .beer-status { font-size: 1.8em; font-weight: bold; margin-top: 24px; }
+      .muted { opacity: 0.5; font-size: 0.85em; }
+    </style>
+  </head>
+  <body x-data="tempPage()">
+    <div class="beer-status" x-show="!loading && !error">
+      <span x-text="username"></span>'s beer is <span x-text="display"></span>
+    </div>
+    <div x-show="loading"><p>...</p></div>
+    <div x-show="error"><p x-text="error"></p></div>
+    <p style="margin-top:24px;"><a href="/">&lt;&lt; back home</a></p>
+
+    <script>
+      function tempPage() {
+        return {
+          username: "",
+          temperature: null,
+          unit: "F",
+          preset: null,
+          loading: true,
+          error: "",
+          get display() {
+            if (this.temperature === null) return "unknown";
+            if (this.preset) {
+              var labels = { "super-chill": "super chill", "frigid": "absolutely frigid", "damn-cold": "damn cold" };
+              return labels[this.preset] || this.temperature + "°" + this.unit;
+            }
+            return this.temperature + "°" + this.unit;
+          },
+          init() {
+            var parts = window.location.pathname.split("/");
+            this.username = parts[parts.length - 1] || "unknown";
+            this.fetchTemp();
+            setInterval(() => this.fetchTemp(), 5000);
+          },
+          async fetchTemp() {
+            try {
+              const res = await fetch("/api/temperature/" + this.username);
+              const data = await res.json();
+              if (!res.ok) { this.error = data.error || "not found"; this.loading = false; return; }
+              this.temperature = data.temperature;
+              this.unit = data.unit || "F";
+              this.preset = data.preset || null;
+              this.error = "";
+            } catch (e) { this.error = "network error"; }
+            this.loading = false;
+          },
+        };
+      }
+    </script>
+  </body>
+</html>
