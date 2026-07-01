@@ -1,4 +1,3 @@
-import { serve } from "bun";
 import { readFileSync, writeFileSync, existsSync } from "fs";
 
 // --- Data persistence ---
@@ -56,16 +55,13 @@ function json(data: any, status = 200): Response {
   });
 }
 
-function serveStatic(path: string): Response | null {
-  if (!existsSync(path)) return null;
-  const file = Bun.file(path);
-  return new Response(file);
-}
+// --- Preload static assets at startup ---
+const INDEX_HTML = Bun.file("index.html");
+const TEMP_HTML = Bun.file("temperature.html");
+const LLMS_TXT = Bun.file("llms.txt");
 
-// --- Router ---
-const HTML_DIR = ".";
-
-serve({
+// --- Server ---
+Bun.serve({
   port: 3000,
   async fetch(req: Request): Promise<Response> {
     const url = new URL(req.url);
@@ -139,27 +135,23 @@ serve({
     // --- SPA route: /t/<username> ---
     const userMatch = path.match(/^\/t\/([a-z0-9_-]+)$/);
     if (userMatch && method === "GET") {
-      const htmlFile = Bun.file(`${HTML_DIR}/temperature.html`);
-      if (htmlFile.exists()) {
-        return new Response(htmlFile, {
-          headers: { "Content-Type": "text/html; charset=utf-8" },
-        });
-      }
-      return new Response("Not found", { status: 404 });
+      return new Response(TEMP_HTML, {
+        headers: { "Content-Type": "text/html; charset=utf-8" },
+      });
     }
 
     // --- Static files ---
     if (path === "/" || path === "/index.html") {
-      return serveStatic(`${HTML_DIR}/index.html`) ?? new Response("Not found", { status: 404 });
+      return new Response(INDEX_HTML, {
+        headers: { "Content-Type": "text/html; charset=utf-8" },
+      });
     }
 
     if (path === "/llms.txt") {
-      return serveStatic(`${HTML_DIR}/llms.txt`) ?? new Response("Not found", { status: 404 });
+      return new Response(LLMS_TXT, {
+        headers: { "Content-Type": "text/plain; charset=utf-8" },
+      });
     }
-
-    // Fallback: try static
-    const staticResp = serveStatic(`${HTML_DIR}${path}`);
-    if (staticResp) return staticResp;
 
     return new Response("Not found", { status: 404 });
   },
