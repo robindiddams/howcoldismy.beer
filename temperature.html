@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>howcoldismy.beer — Beer Temperature</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <style>
+      body {
+        background: linear-gradient(135deg, #5a7a9a 0%, #7a6a9a 50%, #6a8a8a 100%);
+        background-attachment: fixed;
+        min-height: 100vh;
+      }
+    </style>
+  </head>
+  <body class="text-white min-h-screen" x-data="tempPage()">
+    <div class="max-w-2xl mx-auto px-4 pt-16 pb-12">
+      <!-- Back link -->
+      <a href="/" class="text-sm opacity-60 hover:opacity-100 mb-8 inline-block">← back home</a>
+
+      <!-- Main display -->
+      <div class="bg-white/10 backdrop-blur rounded-3xl p-8 border border-white/20 text-center space-y-6">
+        <div>
+          <p class="text-sm uppercase tracking-widest opacity-60">beer temperature for</p>
+          <h1 class="text-3xl font-bold" x-text="username"></h1>
+        </div>
+
+        <!-- Temperature -->
+        <div x-show="!loading && !error" class="space-y-2">
+          <div class="text-7xl font-bold" x-text="tempDisplay"></div>
+          <p class="text-lg opacity-80" x-text="tempMessage"></p>
+          <p class="text-xs opacity-50">last updated <span x-text="lastUpdated"></span></p>
+        </div>
+
+        <!-- Loading -->
+        <div x-show="loading" class="space-y-2">
+          <div class="text-5xl opacity-50 animate-pulse">🍺</div>
+          <p class="opacity-60">Checking the cold…</p>
+        </div>
+
+        <!-- Error -->
+        <div x-show="error" class="space-y-2">
+          <div class="text-4xl">🤔</div>
+          <p class="text-red-200" x-text="error"></p>
+        </div>
+
+        <!-- No temperature yet -->
+        <div x-show="!loading && !error && temperature === null" class="space-y-2">
+          <div class="text-4xl">🌡️</div>
+          <p class="opacity-80">No temperature submitted yet. Claim or use your token on the <a href="/" class="underline text-blue-200">homepage</a>.</p>
+        </div>
+      </div>
+
+      <p class="text-center text-xs opacity-50 mt-6">auto-refreshes every 5 seconds · powered by beer · howcoldismy.beer</p>
+    </div>
+
+    <script>
+      function tempPage() {
+        return {
+          username: "",
+          temperature: null,
+          unit: "F",
+          loading: true,
+          error: "",
+          lastUpdated: "",
+
+          get tempDisplay() {
+            if (this.temperature === null) return "—";
+            return `${this.temperature}°${this.unit}`;
+          },
+
+          get tempMessage() {
+            if (this.temperature === null) return "";
+            const f = this.unit === "C" ? this.temperature * 9/5 + 32 : this.temperature;
+            if (f < 32) return "That's frozen. Is it even beer anymore? 🧊";
+            if (f < 38) return "Ice cold. Perfect. 🥶🍺";
+            if (f < 45) return "Nicely chilled. Good to go. 😎";
+            if (f < 55) return "Cool, but not cold enough. Getting there. 🤔";
+            if (f < 65) return "Room temperature territory. Put it back in the fridge. 😬";
+            return "That's warm beer. Nobody wants warm beer. 😭";
+          },
+
+          init() {
+            // Extract username from URL /t/<username>
+            const parts = window.location.pathname.split("/");
+            this.username = parts[parts.length - 1] || "unknown";
+            this.fetchTemp();
+            // Auto-refresh every 5 seconds
+            setInterval(() => this.fetchTemp(), 5000);
+          },
+
+          async fetchTemp() {
+            try {
+              const res = await fetch(`/api/temperature/${this.username}`);
+              const data = await res.json();
+              if (!res.ok) {
+                this.error = data.error || "Could not load temperature.";
+                this.loading = false;
+                return;
+              }
+              this.temperature = data.temperature;
+              this.unit = data.unit || "F";
+              if (data.lastSeen) {
+                const d = new Date(data.lastSeen);
+                this.lastUpdated = d.toLocaleString();
+              }
+              this.error = "";
+            } catch (e) {
+              this.error = "Network error.";
+            }
+            this.loading = false;
+          },
+        };
+      }
+    </script>
+  </body>
+</html>
