@@ -3,141 +3,87 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>howcoldismy.beer — Is your beer cold enough?</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>howcoldismy.beer</title>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <style>
-      body {
-        background: linear-gradient(135deg, #5a7a9a 0%, #7a6a9a 50%, #6a8a8a 100%);
-        background-attachment: fixed;
-        min-height: 100vh;
-      }
+      body { font-family: monospace; background: #cccccc; color: #000; max-width: 640px; margin: 0 auto; padding: 16px; }
+      h1 { font-size: 1.6em; }
+      h2 { font-size: 1.1em; margin-top: 1.5em; border-bottom: 1px solid #999; }
+      a { color: #0000ee; }
+      code { background: #ddd; padding: 1px 3px; }
+      input, select, button { font-family: monospace; font-size: 1em; border: 1px solid #999; padding: 4px; background: #fff; }
+      button { cursor: pointer; background: #eee; }
+      button:hover { background: #ddd; }
+      hr { border: none; border-top: 1px solid #999; margin: 1.5em 0; }
+      .token-box { border: 1px solid #999; background: #fff; padding: 8px; word-break: break-all; }
+      .err { color: #cc0000; }
+      .ok { color: #006600; }
+      table { border-collapse: collapse; width: 100%; margin-top: 0.5em; }
+      td { padding: 2px 6px; vertical-align: top; }
     </style>
   </head>
-  <body class="text-white min-h-screen" x-data="beerApp()">
-    <!-- Header -->
-    <header class="max-w-2xl mx-auto px-4 pt-12 pb-6 text-center">
-      <h1 class="text-4xl font-bold mb-2">🍺 howcoldismy.beer</h1>
-      <p class="text-lg opacity-80">Find out exactly how cold your beer is. Share it with the world.</p>
-    </header>
+  <body x-data="beerApp()">
+    <h1>howcoldismy.beer</h1>
+    <p>Find out exactly how cold your beer is. Share it with the world.</p>
 
-    <!-- Main app -->
-    <main class="max-w-2xl mx-auto px-4 pb-12 space-y-8">
-      <!-- How it works -->
-      <section class="bg-white/10 backdrop-blur rounded-2xl p-6 border border-white/20">
-        <h2 class="text-xl font-semibold mb-3">How it works</h2>
-        <ol class="list-decimal list-inside space-y-2 opacity-90 text-sm">
-          <li>Claim your username below — you'll get a token. Save it.</li>
-          <li>Send your beer's temperature to the API with your token.</li>
-          <li>Share your link: <code class="bg-black/30 px-1.5 py-0.5 rounded">howcoldismy.beer/t/yourname</code></li>
-          <li>Your temperature page auto-refreshes so everyone knows the cold truth.</li>
-        </ol>
-      </section>
+    <h2>How it works</h2>
+    <ol>
+      <li>Claim your username below -- you'll get a token. Save it.</li>
+      <li>Send your beer's temperature to the API with your token.</li>
+      <li>Share your link: <code>howcoldismy.beer/t/yourname</code></li>
+      <li>Your temperature page auto-refreshes so everyone knows the cold truth.</li>
+    </ol>
 
-      <!-- Claim form -->
-      <section class="bg-white/10 backdrop-blur rounded-2xl p-6 border border-white/20">
-        <h2 class="text-xl font-semibold mb-4">Claim your username</h2>
-        <div class="flex gap-2 flex-col sm:flex-row">
-          <input
-            x-model="claimUsername"
-            type="text"
-            placeholder="e.g. coldbeerbro"
-            class="flex-1 px-4 py-3 rounded-xl bg-black/30 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:border-white/50"
-            @keydown.enter="claim()"
-          />
-          <button
-            @click="claim()"
-            :disabled="claimLoading"
-            class="px-6 py-3 rounded-xl bg-white/20 hover:bg-white/30 disabled:opacity-50 border border-white/20 font-medium transition"
-          >
-            <span x-show="!claimLoading">Claim 🍺</span>
-            <span x-show="claimLoading">Claiming…</span>
-          </button>
-        </div>
-        <div x-show="claimError" class="mt-3 text-red-200 text-sm" x-text="claimError"></div>
-        <div x-show="claimSuccess" class="mt-3 space-y-3">
-          <p class="text-green-200 text-sm">Username claimed! Here's your token — <strong>save it</strong>, there's no recovery:</p>
-          <div class="bg-black/40 rounded-lg p-3 font-mono text-sm break-all border border-white/10" x-text="claimToken"></div>
-          <p class="text-sm opacity-80">Now submit a temperature using the API or the form below:</p>
-          <div class="flex gap-2 items-center">
-            <a
-              :href="'/t/' + claimUsername.toLowerCase()"
-              class="text-blue-200 underline hover:text-blue-100 text-sm"
-            >View your temperature page →</a>
-          </div>
-        </div>
-      </section>
+    <h2>Claim your username</h2>
+    <div style="display:flex; gap:4px; flex-wrap:wrap; align-items:center;">
+      <input x-model="claimUsername" type="text" placeholder="e.g. coldbeerbro" @keydown.enter="claim()" />
+      <button @click="claim()" :disabled="claimLoading">
+        <span x-show="!claimLoading">Claim</span>
+        <span x-show="claimLoading">Claiming...</span>
+      </button>
+    </div>
+    <p class="err" x-show="claimError" x-text="claimError"></p>
+    <div x-show="claimSuccess" style="margin-top:8px;">
+      <p class="ok">Username claimed! Here's your token -- <strong>save it</strong>, there's no recovery:</p>
+      <div class="token-box" x-text="claimToken"></div>
+      <p>Now submit a temperature using the API or the form below:</p>
+      <p><a :href="'/t/' + claimUsername.toLowerCase()">View your temperature page &gt;&gt;</a></p>
+    </div>
 
-      <!-- Submit temperature (if you have a token) -->
-      <section class="bg-white/10 backdrop-blur rounded-2xl p-6 border border-white/20">
-        <h2 class="text-xl font-semibold mb-4">Submit a temperature</h2>
-        <p class="text-sm opacity-70 mb-4">Got a token? Submit your beer's temperature here.</p>
-        <div class="space-y-3">
-          <input
-            x-model="submitToken"
-            type="text"
-            placeholder="Your token"
-            class="w-full px-4 py-3 rounded-xl bg-black/30 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:border-white/50 font-mono text-sm"
-          />
-          <div class="flex gap-2 flex-col sm:flex-row">
-            <input
-              x-model.number="submitTemp"
-              type="number"
-              step="0.1"
-              placeholder="Temperature (e.g. 38)"
-              class="flex-1 px-4 py-3 rounded-xl bg-black/30 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:border-white/50"
-            />
-            <select x-model="submitUnit" class="px-4 py-3 rounded-xl bg-black/30 border border-white/20 text-white focus:outline-none">
-              <option value="F">°F</option>
-              <option value="C">°C</option>
-            </select>
-            <button
-              @click="submitTempApi()"
-              :disabled="submitLoading"
-              class="px-6 py-3 rounded-xl bg-white/20 hover:bg-white/30 disabled:opacity-50 border border-white/20 font-medium transition"
-            >
-              <span x-show="!submitLoading">Submit</span>
-              <span x-show="submitLoading">Submitting…</span>
-            </button>
-          </div>
-          <div x-show="submitError" class="text-red-200 text-sm" x-text="submitError"></div>
-          <div x-show="submitSuccess" class="text-green-200 text-sm" x-text="submitSuccess"></div>
-        </div>
-      </section>
+    <h2>Submit a temperature</h2>
+    <p>Got a token? Submit your beer's temperature here.</p>
+    <div style="display:flex; flex-direction:column; gap:4px; max-width:400px;">
+      <input x-model="submitToken" type="text" placeholder="Your token" />
+      <div style="display:flex; gap:4px;">
+        <input x-model.number="submitTemp" type="number" step="0.1" placeholder="Temperature (e.g. 38)" style="flex:1;" />
+        <select x-model="submitUnit">
+          <option value="F">F</option>
+          <option value="C">C</option>
+        </select>
+        <button @click="submitTempApi()" :disabled="submitLoading">
+          <span x-show="!submitLoading">Submit</span>
+          <span x-show="submitLoading">...</span>
+        </button>
+      </div>
+    </div>
+    <p class="err" x-show="submitError" x-text="submitError"></p>
+    <p class="ok" x-show="submitSuccess" x-text="submitSuccess"></p>
 
-      <!-- API reference -->
-      <section class="bg-white/10 backdrop-blur rounded-2xl p-6 border border-white/20">
-        <h2 class="text-xl font-semibold mb-3">API Reference</h2>
-        <div class="space-y-4 text-sm">
-          <div>
-            <p class="font-mono text-blue-200">POST /api/claim</p>
-            <p class="opacity-70 mt-1">Body: <code class="bg-black/30 px-1.5 rounded">{"username": "yourname"}</code></p>
-            <p class="opacity-70">Returns: <code class="bg-black/30 px-1.5 rounded">{"username", "token"}</code></p>
-          </div>
-          <div>
-            <p class="font-mono text-blue-200">POST /api/temperature</p>
-            <p class="opacity-70 mt-1">Body: <code class="bg-black/30 px-1.5 rounded">{"token": "...", "temperature": 38, "unit": "F"}</code></p>
-          </div>
-          <div>
-            <p class="font-mono text-blue-200">GET /api/temperature/&lt;username&gt;</p>
-            <p class="opacity-70 mt-1">Returns the current temperature for a user.</p>
-          </div>
-          <div>
-            <p class="font-mono text-blue-200">GET /t/&lt;username&gt;</p>
-            <p class="opacity-70 mt-1">Human-readable temperature page. Auto-refreshes.</p>
-          </div>
-        </div>
-        <p class="mt-4 text-xs opacity-50">Tokens expire if unused for 8 days. Claim again if that happens.</p>
-      </section>
+    <h2>API Reference</h2>
+    <table>
+      <tr><td><code>POST /api/claim</code></td><td>Body: <code>{"username":"yourname"}</code> -- Returns: <code>{"username","token"}</code></td></tr>
+      <tr><td><code>POST /api/temperature</code></td><td>Body: <code>{"token":"...","temperature":38,"unit":"F"}</code></td></tr>
+      <tr><td><code>GET /api/temperature/&lt;username&gt;</code></td><td>Returns the current temperature for a user.</td></tr>
+      <tr><td><code>GET /t/&lt;username&gt;</code></td><td>Human-readable temperature page. Auto-refreshes.</td></tr>
+    </table>
+    <p style="font-size:0.8em; color:#666;">Tokens expire if unused for 8 days. Claim again if that happens.</p>
 
-      <!-- Robin's original content -->
-      <hr class="border-white/20" />
-      <footer class="text-sm opacity-60 space-y-2">
-        <p>A site by <a href="https://github.com/robindiddams" class="text-blue-200 underline">robin diddams</a> and <a href="https://github.com/louthehuman" class="text-blue-200 underline">louie</a>.</p>
-        <p>robin is a 1000000x engineer, thought leader, total rockstar developer, southwest rapidrewards member. spotted wearing scrubs.</p>
-        <p class="text-xs">site updated january 1st 1970</p>
-      </footer>
-    </main>
+    <hr>
+    <p style="font-size:0.9em;">
+      A site by <a href="https://github.com/robindiddams">robin diddams</a> and <a href="https://github.com/louthehuman">louie</a>.<br>
+      robin is a 1000000x engineer, thought leader, total rockstar developer, southwest rapidrewards member. spotted wearing scrubs.<br>
+      <span style="font-size:0.8em;">site updated january 1st 1970</span>
+    </p>
 
     <script>
       function beerApp() {
@@ -147,68 +93,36 @@
           claimError: "",
           claimSuccess: false,
           claimToken: "",
-
           submitToken: "",
           submitTemp: null,
           submitUnit: "F",
           submitLoading: false,
           submitError: "",
           submitSuccess: "",
-
           async claim() {
             this.claimError = "";
             this.claimSuccess = false;
-            if (!this.claimUsername.trim()) {
-              this.claimError = "Enter a username first.";
-              return;
-            }
+            if (!this.claimUsername.trim()) { this.claimError = "Enter a username first."; return; }
             this.claimLoading = true;
             try {
-              const res = await fetch("/api/claim", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ username: this.claimUsername.trim() }),
-              });
+              const res = await fetch("/api/claim", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ username: this.claimUsername.trim() }) });
               const data = await res.json();
-              if (!res.ok) {
-                this.claimError = data.error || "Something went wrong.";
-              } else {
-                this.claimToken = data.token;
-                this.claimSuccess = true;
-              }
-            } catch (e) {
-              this.claimError = "Network error.";
-            }
+              if (!res.ok) { this.claimError = data.error || "Something went wrong."; }
+              else { this.claimToken = data.token; this.claimSuccess = true; }
+            } catch (e) { this.claimError = "Network error."; }
             this.claimLoading = false;
           },
-
           async submitTempApi() {
             this.submitError = "";
             this.submitSuccess = "";
-            if (!this.submitToken || this.submitTemp === null) {
-              this.submitError = "Fill in your token and a temperature.";
-              return;
-            }
+            if (!this.submitToken || this.submitTemp === null) { this.submitError = "Fill in your token and a temperature."; return; }
             this.submitLoading = true;
             try {
-              const res = await fetch("/api/temperature", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                  token: this.submitToken,
-                  temperature: this.submitTemp,
-                  unit: this.submitUnit,
-                }),
-              });
+              const res = await fetch("/api/temperature", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ token: this.submitToken, temperature: this.submitTemp, unit: this.submitUnit }) });
               const data = await res.json();
-              if (!res.ok) {
-                this.submitError = data.error || "Something went wrong.";
-              } else {
-                this.submitSuccess = `Updated! ${data.username}'s beer is ${data.temperature}°${data.unit}.`;
-              }
-            } catch (e) {
-              this.submitError = "Network error.";
-            }
+              if (!res.ok) { this.submitError = data.error || "Something went wrong."; }
+              else { this.submitSuccess = "Updated! " + data.username + "'s beer is " + data.temperature + "°" + data.unit + "."; }
+            } catch (e) { this.submitError = "Network error."; }
             this.submitLoading = false;
           },
         };
