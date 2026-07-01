@@ -1,5 +1,5 @@
 import { readFileSync, writeFileSync, existsSync } from "fs";
-import ecoji from "ecoji-js";
+import { randomToken } from "./ecoji";
 
 // --- Data persistence ---
 // TODO: migrate to SQLite (e.g. bun:sqlite) for better concurrency & durability
@@ -31,12 +31,6 @@ function saveData(data: DataShape) {
   writeFileSync(DATA_FILE, JSON.stringify(data, null, 2));
 }
 
-function randomToken(): string {
-  // 16 random bytes → ecoji emoji encoding. Fun and memorable tokens!
-  const bytes = new Uint8Array(16);
-  crypto.getRandomValues(bytes);
-  return ecoji.encode(Buffer.from(bytes).toString("utf-8"));
-}
 
 function pruneExpired(data: DataShape): DataShape {
   const now = Date.now();
