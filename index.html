@@ -25,7 +25,8 @@
       button:hover { background: rgba(255,255,255,0.25); }
       button:disabled { opacity: 0.5; }
       hr { border: none; border-top: 1px solid rgba(255,255,255,0.15); margin: 1.5em 0; }
-      .token-box { border: 1px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.35); padding: 8px; word-break: break-all; }
+      .token-row { display: flex; gap: 4px; align-items: center; }
+      .token-box { border: 1px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.35); padding: 8px; word-break: break-all; flex: 1; }
       .err { color: #fbb; }
       .ok { color: #bfb; }
       table { width: 100%; border-collapse: collapse; font-size: 0.9em; }
@@ -49,7 +50,11 @@
     <p class="err" x-show="claimError" x-text="claimError"></p>
     <div x-show="claimSuccess" style="margin-top:8px;">
       <p class="ok">Claimed! Save this token -- no recovery:</p>
-      <div class="token-box" x-text="claimToken"></div>
+      <div class="token-row">
+        <div class="token-box" x-text="claimToken"></div>
+        <button @click="copyToken()">Copy</button>
+      </div>
+      <p x-show="copied" class="ok" style="margin-top:4px;">Copied!</p>
       <p><a :href="'/t/' + claimUsername.toLowerCase()">Your page &gt;&gt;</a></p>
     </div>
 
@@ -111,18 +116,31 @@
           submitError: "",
           submitSuccess: "",
           recent: [],
+          copied: false,
           async claim() {
             this.claimError = "";
             this.claimSuccess = false;
+            this.copied = false;
             if (!this.claimUsername.trim()) { this.claimError = "Enter a username."; return; }
             this.claimLoading = true;
             try {
               const res = await fetch("/api/claim", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ username: this.claimUsername.trim() }) });
               const data = await res.json();
               if (!res.ok) { this.claimError = data.error || "Error."; }
-              else { this.claimToken = data.token; this.claimSuccess = true; this.fetchRecent(); }
+              else {
+                this.claimToken = data.token;
+                this.submitToken = data.token;
+                this.claimSuccess = true;
+                this.fetchRecent();
+              }
             } catch (e) { this.claimError = "Network error."; }
             this.claimLoading = false;
+          },
+          copyToken() {
+            navigator.clipboard.writeText(this.claimToken).then(() => {
+              this.copied = true;
+              setTimeout(() => this.copied = false, 2000);
+            });
           },
           async submitTempApi() {
             this.submitError = "";
@@ -140,7 +158,7 @@
           async fetchRecent() {
             try {
               const res = await fetch("/api/recent");
-              this.recent = await res.json();
+              if (res.ok) this.recent = await res.json();
             } catch (e) {}
           },
           init() { this.fetchRecent(); }
