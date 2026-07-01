@@ -70,7 +70,7 @@ const TEMP_HTML = new Response(TEMP_HTML_STR, { headers: { "Content-Type": "text
 const LLMS_TXT = new Response(LLMS_TXT_STR, { headers: { "Content-Type": "text/plain" } });
 
 Bun.serve({
-  port: 3000,
+  port: Number(process.env.PORT) || 6334,
   routes: {
     // --- Static ---
     "/": INDEX_HTML,
@@ -171,4 +171,4 @@ Bun.serve({
   fetch: () => new Response("Not found", { status: 404 }),
 });
 
-console.log("🍺 howcoldismy.beer server running on http://localhost:3000");
+console.log("🍺 howcoldismy.beer server running on http://localhost:6334");
