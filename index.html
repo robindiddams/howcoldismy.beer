@@ -4,11 +4,19 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>howcoldismy.beer</title>
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script
+      defer
+      src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"
+    ></script>
     <style>
       body {
         font-family: sans-serif;
-        background: linear-gradient(135deg, #5a7a9a 0%, #7a6a9a 50%, #6a8a8a 100%);
+        background: linear-gradient(
+          135deg,
+          #5a7a9a 0%,
+          #7a6a9a 50%,
+          #6a8a8a 100%
+        );
         background-attachment: fixed;
         min-height: 100vh;
         color: #fff;
@@ -16,94 +24,246 @@
         margin: 0 auto;
         padding: 24px 16px;
       }
-      h1 { font-size: 1.5em; margin-bottom: 0.2em; }
-      h2 { font-size: 1em; margin-top: 1.8em; opacity: 0.9; }
-      a { color: #aaf; }
-      input, select, button { font-size: 1em; border: 1px solid rgba(255,255,255,0.3); padding: 6px; background: rgba(0,0,0,0.3); color: #fff; border-radius: 0; }
-      input::placeholder { color: rgba(255,255,255,0.4); }
-      button { cursor: pointer; background: rgba(255,255,255,0.15); }
-      button:hover { background: rgba(255,255,255,0.25); }
-      button:disabled { opacity: 0.5; }
-      hr { border: none; border-top: 1px solid rgba(255,255,255,0.15); margin: 1.5em 0; }
-      .token-row { display: flex; gap: 4px; align-items: center; }
-      .token-box { border: 1px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.35); padding: 8px; word-break: break-all; flex: 1; }
-      .err { color: #fbb; }
-      .ok { color: #bfb; }
-      table { width: 100%; border-collapse: collapse; font-size: 0.9em; }
-      th, td { text-align: left; padding: 4px 8px; border-bottom: 1px solid rgba(255,255,255,0.1); }
-      th { opacity: 0.6; font-weight: normal; }
-      .muted { opacity: 0.5; font-size: 0.85em; }
-      .cold-beer { font-style: italic; font-weight: bold; color: #6bb6ff; }
-      .signup { font-size: 1.1em; text-align: center; }
+      h1 {
+        font-size: 1.5em;
+        margin-bottom: 0.2em;
+      }
+      h2 {
+        font-size: 1em;
+        margin-top: 1.8em;
+        opacity: 0.9;
+      }
+      a {
+        color: #aaf;
+      }
+      input,
+      select,
+      button {
+        font-size: 1em;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        padding: 6px;
+        background: rgba(0, 0, 0, 0.3);
+        color: #fff;
+        border-radius: 0;
+      }
+      input::placeholder {
+        color: rgba(255, 255, 255, 0.4);
+      }
+      button {
+        cursor: pointer;
+        background: rgba(255, 255, 255, 0.15);
+      }
+      button:hover {
+        background: rgba(255, 255, 255, 0.25);
+      }
+      button:disabled {
+        opacity: 0.5;
+      }
+      hr {
+        border: none;
+        border-top: 1px solid rgba(255, 255, 255, 0.15);
+        margin: 1.5em 0;
+      }
+      .token-row {
+        display: flex;
+        gap: 4px;
+        align-items: center;
+      }
+      .token-box {
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        background: rgba(0, 0, 0, 0.35);
+        padding: 8px;
+        word-break: break-all;
+        flex: 1;
+      }
+      .err {
+        color: #fbb;
+      }
+      .ok {
+        color: #bfb;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.9em;
+      }
+      th,
+      td {
+        text-align: left;
+        padding: 4px 8px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      }
+      th {
+        opacity: 0.6;
+        font-weight: normal;
+      }
+      .muted {
+        opacity: 0.5;
+        font-size: 0.85em;
+      }
+      .cold-beer {
+        font-style: italic;
+        font-weight: bold;
+        color: #6bb6ff;
+      }
+      .signup {
+        font-size: 1.1em;
+        text-align: center;
+      }
 
-      .preset-row { display: flex; gap: 4px; flex-wrap: wrap; }
-      .preset-btn { flex: 1; text-align: center; padding: 10px 8px; font-size: 0.9em; border: 1px solid rgba(255,255,255,0.3); background: rgba(0,0,0,0.3); color: #fff; cursor: pointer; }
-      .preset-btn:hover { background: rgba(255,255,255,0.2); }
-      .preset-btn.selected { background: rgba(255,255,255,0.3); border-color: rgba(255,255,255,0.6); }
+      .preset-row {
+        display: flex;
+        gap: 4px;
+        flex-wrap: wrap;
+      }
+      .preset-btn {
+        flex: 1;
+        text-align: center;
+        padding: 10px 8px;
+        font-size: 0.9em;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        background: rgba(0, 0, 0, 0.3);
+        color: #fff;
+        cursor: pointer;
+      }
+      .preset-btn:hover {
+        background: rgba(255, 255, 255, 0.2);
+      }
+      .preset-btn.selected {
+        background: rgba(255, 255, 255, 0.3);
+        border-color: rgba(255, 255, 255, 0.6);
+      }
 
       @keyframes flash {
-        0% { opacity: 0; transform: scale(0.8); }
-        20% { opacity: 1; transform: scale(1.1); }
-        40% { transform: scale(1); }
-        80% { opacity: 1; }
-        100% { opacity: 0; transform: scale(1); }
+        0% {
+          opacity: 0;
+          transform: scale(0.8);
+        }
+        20% {
+          opacity: 1;
+          transform: scale(1.1);
+        }
+        40% {
+          transform: scale(1);
+        }
+        80% {
+          opacity: 1;
+        }
+        100% {
+          opacity: 0;
+          transform: scale(1);
+        }
       }
-      .flash { animation: flash 1.5s ease-out forwards; }
+      .flash {
+        animation: flash 1.5s ease-out forwards;
+      }
 
       @keyframes radical {
-        0% { opacity: 0; transform: translateY(10px) scale(0.9); }
-        30% { opacity: 1; transform: translateY(0) scale(1.05); }
-        50% { transform: scale(1); }
-        100% { opacity: 1; }
+        0% {
+          opacity: 0;
+          transform: translateY(10px) scale(0.9);
+        }
+        30% {
+          opacity: 1;
+          transform: translateY(0) scale(1.05);
+        }
+        50% {
+          transform: scale(1);
+        }
+        100% {
+          opacity: 1;
+        }
       }
-      .radical { animation: radical 0.6s ease-out forwards; }
+      .radical {
+        animation: radical 0.6s ease-out forwards;
+      }
 
       @keyframes preset-super-chill {
-        0% { box-shadow: 0 0 0 rgba(100,200,255,0); }
-        50% { box-shadow: 0 0 20px rgba(100,200,255,0.5); }
-        100% { box-shadow: 0 0 0 rgba(100,200,255,0); }
+        0% {
+          box-shadow: 0 0 0 rgba(100, 200, 255, 0);
+        }
+        50% {
+          box-shadow: 0 0 20px rgba(100, 200, 255, 0.5);
+        }
+        100% {
+          box-shadow: 0 0 0 rgba(100, 200, 255, 0);
+        }
       }
       @keyframes preset-frigid {
-        0% { box-shadow: 0 0 0 rgba(150,220,255,0); }
-        50% { box-shadow: 0 0 25px rgba(150,220,255,0.7); }
-        100% { box-shadow: 0 0 0 rgba(150,220,255,0); }
+        0% {
+          box-shadow: 0 0 0 rgba(150, 220, 255, 0);
+        }
+        50% {
+          box-shadow: 0 0 25px rgba(150, 220, 255, 0.7);
+        }
+        100% {
+          box-shadow: 0 0 0 rgba(150, 220, 255, 0);
+        }
       }
       @keyframes preset-damn-cold {
-        0% { box-shadow: 0 0 0 rgba(200,240,255,0); }
-        50% { box-shadow: 0 0 30px rgba(200,240,255,0.8); }
-        100% { box-shadow: 0 0 0 rgba(200,240,255,0); }
+        0% {
+          box-shadow: 0 0 0 rgba(200, 240, 255, 0);
+        }
+        50% {
+          box-shadow: 0 0 30px rgba(200, 240, 255, 0.8);
+        }
+        100% {
+          box-shadow: 0 0 0 rgba(200, 240, 255, 0);
+        }
       }
-      #preset-super-chill.selected { animation: preset-super-chill 2s ease-in-out infinite; }
-      #preset-frigid.selected { animation: preset-frigid 2s ease-in-out infinite; }
-      #preset-damn-cold.selected { animation: preset-damn-cold 2s ease-in-out infinite; }
+      #preset-super-chill.selected {
+        animation: preset-super-chill 2s ease-in-out infinite;
+      }
+      #preset-frigid.selected {
+        animation: preset-frigid 2s ease-in-out infinite;
+      }
+      #preset-damn-cold.selected {
+        animation: preset-damn-cold 2s ease-in-out infinite;
+      }
     </style>
   </head>
   <body x-data="beerApp()">
-    <h1>MY BEER IS SO COLD YOU HAVE NO IDEA BRO</h1>
+    <h1>MY BEER IS SO COLD YOU HAVE NO IDEA</h1>
 
     <!-- Latest checkins -->
     <h2>whos got <em class="cold-beer">cold beer</em>:</h2>
     <table>
-      <thead><tr><th>who???</th><th>temp</th><th>when</th></tr></thead>
+      <thead>
+        <tr>
+          <th>who???</th>
+          <th>temp</th>
+          <th>when</th>
+        </tr>
+      </thead>
       <tbody>
         <template x-for="row in recent" :key="row.username">
           <tr>
             <td><a :href="'/t/' + row.username" x-text="row.username"></a></td>
             <td>
               <span x-show="row.preset" x-text="presetLabel(row.preset)"></span>
-              <span x-show="!row.preset" x-text="row.temperature + '°' + row.unit"></span>
+              <span
+                x-show="!row.preset"
+                x-text="row.temperature + '°' + row.unit"
+              ></span>
             </td>
             <td class="muted" x-text="row.ago"></td>
           </tr>
         </template>
-        <tr x-show="recent.length === 0"><td colspan="3" class="muted">No checkins yet.</td></tr>
+        <tr x-show="recent.length === 0">
+          <td colspan="3" class="muted">No checkins yet.</td>
+        </tr>
       </tbody>
     </table>
 
     <!-- SIGN UP -->
     <h2 class="signup" x-show="!claimed">👇 SIGN UP RIGHT NOW PLEASE 👇</h2>
-    <div x-show="!claimed" style="display:flex; gap:4px; flex-wrap:wrap;">
-      <input x-model="claimUsername" type="text" placeholder="e.g. coldbeerbro" @keydown.enter="claim()" />
+    <div x-show="!claimed" style="display: flex; gap: 4px; flex-wrap: wrap">
+      <input
+        x-model="claimUsername"
+        type="text"
+        placeholder="e.g. coldbeerbro"
+        @keydown.enter="claim()"
+      />
       <button @click="claim()" :disabled="claimLoading">
         <span x-show="!claimLoading">I WANT THIS NAME</span>
         <span x-show="claimLoading">...</span>
@@ -112,27 +272,67 @@
     <p class="err" x-show="claimError" x-text="claimError"></p>
 
     <!-- Radical!! (on signup) -->
-    <div x-show="claimed && !returningUser" class="radical" style="margin-top:12px;">
-      <p style="font-size:1.6em; font-weight:bold;">🤙 Radical!! 🏄‍♂️</p>
+    <div
+      x-show="claimed && !returningUser"
+      class="radical"
+      style="margin-top: 12px"
+    >
+      <p style="font-size: 1.6em; font-weight: bold">🤙 Radical!! 🏄‍♂️</p>
     </div>
 
     <!-- SUP (returning user) -->
-    <div x-show="claimed && returningUser" style="margin-top:12px;">
-      <p style="font-size:1.3em; font-weight:bold;">SUP <span style="font-family:monospace;font-weight:normal;background:rgba(0,0,0,0.2);padding:0 4px;" x-text="claimUsername || '&lt;USERNAME&gt;'"></span> whats that beer like?</p>
+    <div x-show="claimed && returningUser" style="margin-top: 12px">
+      <p style="font-size: 1.3em; font-weight: bold">
+        SUP
+        <span
+          style="
+            font-family: monospace;
+            font-weight: normal;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 0 4px;
+          "
+          x-text="claimUsername || '&lt;USERNAME&gt;'"
+        ></span>
+        whats that beer like?
+      </p>
     </div>
 
     <!-- Checkin (only after claim) -->
-    <div x-show="claimed" style="margin-top:16px;">
+    <div x-show="claimed" style="margin-top: 16px">
       <h2 x-show="returningUser">MY BEER IS:</h2>
       <h2 x-show="!returningUser">nOW HOW COLD IS THAT BEER?!</h2>
       <div class="preset-row">
-        <button id="preset-super-chill" class="preset-btn" @click="submitPreset('super-chill')">super chill</button>
-        <button id="preset-frigid" class="preset-btn" @click="submitPreset('frigid')">absolutely frigid</button>
-        <button id="preset-damn-cold" class="preset-btn" @click="submitPreset('damn-cold')">damn cold</button>
+        <button
+          id="preset-super-chill"
+          class="preset-btn"
+          @click="submitPreset('super-chill')"
+        >
+          super chill
+        </button>
+        <button
+          id="preset-frigid"
+          class="preset-btn"
+          @click="submitPreset('frigid')"
+        >
+          absolutely frigid
+        </button>
+        <button
+          id="preset-damn-cold"
+          class="preset-btn"
+          @click="submitPreset('damn-cold')"
+        >
+          damn cold
+        </button>
       </div>
-      <p class="muted" style="margin-top:8px;">or give me the digits 📱</p>
-      <div style="display:flex; gap:4px; max-width:360px;">
-        <input x-model.number="submitTemp" type="number" step="0.1" placeholder="Temp (e.g. 38)" style="flex:1;" />
+      <p class="muted" style="margin-top: 8px">or give me the digits 📱</p>
+      <div style="display: flex; gap: 4px; max-width: 360px">
+        <input
+          x-model.number="submitTemp"
+          type="number"
+          step="0.1"
+          placeholder="Temp (e.g. 38)"
+          style="flex: 1"
+        />
         <select x-model="submitUnit">
           <option value="F">F</option>
           <option value="C">C</option>
@@ -147,11 +347,16 @@
     <p class="err" x-show="submitError" x-text="submitError"></p>
 
     <!-- cool flash -->
-    <div x-show="coolFlash" x-transition.duration.1500ms class="flash" style="font-size:1.4em; font-weight:bold; margin-top:12px;">
+    <div
+      x-show="coolFlash"
+      x-transition.duration.1500ms
+      class="flash"
+      style="font-size: 1.4em; font-weight: bold; margin-top: 12px"
+    >
       cooooooooooooooooooooooooool
     </div>
 
-    <hr>
+    <hr />
 
     <!-- lol wut -->
     <h2>lol wut</h2>
@@ -162,16 +367,25 @@
     </ol>
 
     <!-- Token (last) -->
-    <div x-show="claimed" style="margin-top:16px;">
-      <p class="muted">ur token (for the <a href="/llms.txt">api</a> <- dont loose it)</p>
+    <div x-show="claimed" style="margin-top: 16px">
+      <p class="muted">
+        ur token (for the <a href="/llms.txt">api</a> <- dont loose it)
+      </p>
       <div class="token-row">
         <div class="token-box" x-text="claimToken"></div>
-        <button @click="copyToken()" x-text="copied ? 'Copied!' : 'Copy'"></button>
+        <button
+          @click="copyToken()"
+          x-text="copied ? 'Copied!' : 'Copy'"
+        ></button>
       </div>
     </div>
 
-    <hr>
-    <p class="muted">made by <a href="https://github.com/robindiddams">robin</a> and <a href="https://github.com/louthehuman">louie</a> · site updated january 1st 1970</p>
+    <hr />
+    <p class="muted">
+      made by <a href="https://github.com/robindiddams">robin</a> and
+      <a href="https://github.com/louthehuman">louie</a> · site updated january
+      1st 1970
+    </p>
 
     <script>
       function beerApp() {
@@ -192,7 +406,7 @@
           coolFlash: false,
           presets: {
             "super-chill": "super chill",
-            "frigid": "absolutely frigid",
+            frigid: "absolutely frigid",
             "damn-cold": "damn cold",
           },
           init() {
@@ -207,16 +421,26 @@
             }
             this.fetchRecent();
           },
-          presetLabel(id) { return this.presets[id] || id; },
+          presetLabel(id) {
+            return this.presets[id] || id;
+          },
           async claim() {
             this.claimError = "";
-            if (!this.claimUsername.trim()) { this.claimError = "Enter a username."; return; }
+            if (!this.claimUsername.trim()) {
+              this.claimError = "Enter a username.";
+              return;
+            }
             this.claimLoading = true;
             try {
-              const res = await fetch("/api/claim", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ username: this.claimUsername.trim() }) });
+              const res = await fetch("/api/claim", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ username: this.claimUsername.trim() }),
+              });
               const data = await res.json();
-              if (!res.ok) { this.claimError = data.error || "Error."; }
-              else {
+              if (!res.ok) {
+                this.claimError = data.error || "Error.";
+              } else {
                 this.claimToken = data.token;
                 this.submitToken = data.token;
                 this.claimed = true;
@@ -225,40 +449,72 @@
                 localStorage.setItem("hcb_username", this.claimUsername.trim());
                 this.fetchRecent();
               }
-            } catch (e) { this.claimError = "Network error."; }
+            } catch (e) {
+              this.claimError = "Network error.";
+            }
             this.claimLoading = false;
           },
           copyToken() {
             navigator.clipboard.writeText(this.claimToken).then(() => {
               this.copied = true;
-              setTimeout(() => this.copied = false, 2000);
+              setTimeout(() => (this.copied = false), 2000);
             });
           },
           flashCool() {
             this.coolFlash = true;
-            setTimeout(() => this.coolFlash = false, 1600);
+            setTimeout(() => (this.coolFlash = false), 1600);
           },
           async submitPreset(presetId) {
             this.submitError = "";
             this.submitLoading = true;
             try {
-              const res = await fetch("/api/temperature", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ token: this.submitToken, preset: presetId }) });
+              const res = await fetch("/api/temperature", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  token: this.submitToken,
+                  preset: presetId,
+                }),
+              });
               const data = await res.json();
-              if (!res.ok) { this.submitError = data.error || "Error."; }
-              else { this.flashCool(); this.fetchRecent(); }
-            } catch (e) { this.submitError = "Network error."; }
+              if (!res.ok) {
+                this.submitError = data.error || "Error.";
+              } else {
+                this.flashCool();
+                this.fetchRecent();
+              }
+            } catch (e) {
+              this.submitError = "Network error.";
+            }
             this.submitLoading = false;
           },
           async submitTempApi() {
             this.submitError = "";
-            if (!this.submitToken || this.submitTemp === null) { this.submitError = "Need token and temp."; return; }
+            if (!this.submitToken || this.submitTemp === null) {
+              this.submitError = "Need token and temp.";
+              return;
+            }
             this.submitLoading = true;
             try {
-              const res = await fetch("/api/temperature", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ token: this.submitToken, temperature: this.submitTemp, unit: this.submitUnit }) });
+              const res = await fetch("/api/temperature", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  token: this.submitToken,
+                  temperature: this.submitTemp,
+                  unit: this.submitUnit,
+                }),
+              });
               const data = await res.json();
-              if (!res.ok) { this.submitError = data.error || "Error."; }
-              else { this.flashCool(); this.fetchRecent(); }
-            } catch (e) { this.submitError = "Network error."; }
+              if (!res.ok) {
+                this.submitError = data.error || "Error.";
+              } else {
+                this.flashCool();
+                this.fetchRecent();
+              }
+            } catch (e) {
+              this.submitError = "Network error.";
+            }
             this.submitLoading = false;
           },
           async fetchRecent() {
