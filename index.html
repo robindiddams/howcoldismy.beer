@@ -3,68 +3,61 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>howcoldismy.beer — Is your beer cold enough?</title>
+    <title>howcoldismy.beer</title>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <style>
       body {
-        font-family: monospace;
+        font-family: sans-serif;
         background: linear-gradient(135deg, #5a7a9a 0%, #7a6a9a 50%, #6a8a8a 100%);
         background-attachment: fixed;
         min-height: 100vh;
         color: #fff;
-        max-width: 640px;
+        max-width: 560px;
         margin: 0 auto;
-        padding: 16px;
+        padding: 24px 16px;
       }
-      h1 { font-size: 1.6em; }
-      h2 { font-size: 1.1em; margin-top: 1.5em; }
+      h1 { font-size: 1.5em; margin-bottom: 0.2em; }
+      h2 { font-size: 1em; margin-top: 1.8em; opacity: 0.9; }
       a { color: #aaf; }
-      code { background: rgba(0,0,0,0.3); padding: 1px 4px; }
-      input, select, button { font-family: monospace; font-size: 1em; border: 1px solid rgba(255,255,255,0.3); padding: 5px; background: rgba(0,0,0,0.3); color: #fff; }
+      input, select, button { font-size: 1em; border: 1px solid rgba(255,255,255,0.3); padding: 6px; background: rgba(0,0,0,0.3); color: #fff; border-radius: 0; }
       input::placeholder { color: rgba(255,255,255,0.4); }
       button { cursor: pointer; background: rgba(255,255,255,0.15); }
       button:hover { background: rgba(255,255,255,0.25); }
       button:disabled { opacity: 0.5; }
-      hr { border: none; border-top: 1px solid rgba(255,255,255,0.2); margin: 1.5em 0; }
+      hr { border: none; border-top: 1px solid rgba(255,255,255,0.15); margin: 1.5em 0; }
       .token-box { border: 1px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.35); padding: 8px; word-break: break-all; }
       .err { color: #fbb; }
       .ok { color: #bfb; }
+      table { width: 100%; border-collapse: collapse; font-size: 0.9em; }
+      th, td { text-align: left; padding: 4px 8px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+      th { opacity: 0.6; font-weight: normal; }
+      .muted { opacity: 0.5; font-size: 0.85em; }
     </style>
   </head>
   <body x-data="beerApp()">
     <h1>howcoldismy.beer</h1>
-    <p>Find out exactly how cold your beer is. Share it with the world.</p>
-
-    <h2>How it works</h2>
-    <ol>
-      <li>Claim your username below -- you'll get a token. Save it.</li>
-      <li>Send your beer's temperature to the API with your token.</li>
-      <li>Share your link: <code>howcoldismy.beer/t/yourname</code></li>
-      <li>Your temperature page auto-refreshes so everyone knows the cold truth.</li>
-    </ol>
+    <p class="muted">How cold is your beer? Share it with the world.</p>
 
     <h2>Claim your username</h2>
-    <div style="display:flex; gap:4px; flex-wrap:wrap; align-items:center;">
+    <div style="display:flex; gap:4px; flex-wrap:wrap;">
       <input x-model="claimUsername" type="text" placeholder="e.g. coldbeerbro" @keydown.enter="claim()" />
       <button @click="claim()" :disabled="claimLoading">
         <span x-show="!claimLoading">Claim</span>
-        <span x-show="claimLoading">Claiming...</span>
+        <span x-show="claimLoading">...</span>
       </button>
     </div>
     <p class="err" x-show="claimError" x-text="claimError"></p>
     <div x-show="claimSuccess" style="margin-top:8px;">
-      <p class="ok">Username claimed! Here's your token -- <strong>save it</strong>, there's no recovery:</p>
+      <p class="ok">Claimed! Save this token -- no recovery:</p>
       <div class="token-box" x-text="claimToken"></div>
-      <p>Now submit a temperature using the form below:</p>
-      <p><a :href="'/t/' + claimUsername.toLowerCase()">View your temperature page &gt;&gt;</a></p>
+      <p><a :href="'/t/' + claimUsername.toLowerCase()">Your page &gt;&gt;</a></p>
     </div>
 
     <h2>Submit a temperature</h2>
-    <p>Got a token? Submit your beer's temperature here.</p>
-    <div style="display:flex; flex-direction:column; gap:4px; max-width:400px;">
-      <input x-model="submitToken" type="text" placeholder="Your token" />
+    <div style="display:flex; flex-direction:column; gap:4px; max-width:360px;">
+      <input x-model="submitToken" type="text" placeholder="Token" />
       <div style="display:flex; gap:4px;">
-        <input x-model.number="submitTemp" type="number" step="0.1" placeholder="Temperature (e.g. 38)" style="flex:1;" />
+        <input x-model.number="submitTemp" type="number" step="0.1" placeholder="Temp (e.g. 38)" style="flex:1;" />
         <select x-model="submitUnit">
           <option value="F">F</option>
           <option value="C">C</option>
@@ -78,14 +71,30 @@
     <p class="err" x-show="submitError" x-text="submitError"></p>
     <p class="ok" x-show="submitSuccess" x-text="submitSuccess"></p>
 
-    <p style="font-size:0.8em; opacity:0.6; margin-top:1em;">Tokens expire if unused for 8 days. Claim again if that happens.</p>
+    <h2>Recently updated</h2>
+    <table>
+      <thead><tr><th>user</th><th>temp</th><th>when</th></tr></thead>
+      <tbody>
+        <template x-for="row in recent" :key="row.username">
+          <tr>
+            <td><a :href="'/t/' + row.username" x-text="row.username"></a></td>
+            <td x-text="row.temperature + '°' + row.unit"></td>
+            <td class="muted" x-text="row.ago"></td>
+          </tr>
+        </template>
+        <tr x-show="recent.length === 0"><td colspan="3" class="muted">No temperatures yet.</td></tr>
+      </tbody>
+    </table>
+
+    <h2>How it works</h2>
+    <ol class="muted">
+      <li>Claim a username, get a token.</li>
+      <li>Submit your beer's temperature with the token.</li>
+      <li>Share <code>howcoldismy.beer/t/yourname</code> -- it auto-refreshes.</li>
+    </ol>
 
     <hr>
-    <p style="font-size:0.9em; opacity:0.7;">
-      A site by <a href="https://github.com/robindiddams">robin diddams</a> and <a href="https://github.com/louthehuman">louie</a>.<br>
-      robin is a 1000000x engineer, thought leader, total rockstar developer, southwest rapidrewards member. spotted wearing scrubs.<br>
-      <span style="font-size:0.8em;">site updated january 1st 1970</span>
-    </p>
+    <p class="muted">made by <a href="https://github.com/robindiddams">robin</a> and <a href="https://github.com/louthehuman">louie</a> · site updated january 1st 1970</p>
 
     <script>
       function beerApp() {
@@ -101,32 +110,40 @@
           submitLoading: false,
           submitError: "",
           submitSuccess: "",
+          recent: [],
           async claim() {
             this.claimError = "";
             this.claimSuccess = false;
-            if (!this.claimUsername.trim()) { this.claimError = "Enter a username first."; return; }
+            if (!this.claimUsername.trim()) { this.claimError = "Enter a username."; return; }
             this.claimLoading = true;
             try {
               const res = await fetch("/api/claim", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ username: this.claimUsername.trim() }) });
               const data = await res.json();
-              if (!res.ok) { this.claimError = data.error || "Something went wrong."; }
-              else { this.claimToken = data.token; this.claimSuccess = true; }
+              if (!res.ok) { this.claimError = data.error || "Error."; }
+              else { this.claimToken = data.token; this.claimSuccess = true; this.fetchRecent(); }
             } catch (e) { this.claimError = "Network error."; }
             this.claimLoading = false;
           },
           async submitTempApi() {
             this.submitError = "";
             this.submitSuccess = "";
-            if (!this.submitToken || this.submitTemp === null) { this.submitError = "Fill in your token and a temperature."; return; }
+            if (!this.submitToken || this.submitTemp === null) { this.submitError = "Need token and temp."; return; }
             this.submitLoading = true;
             try {
               const res = await fetch("/api/temperature", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ token: this.submitToken, temperature: this.submitTemp, unit: this.submitUnit }) });
               const data = await res.json();
-              if (!res.ok) { this.submitError = data.error || "Something went wrong."; }
-              else { this.submitSuccess = "Updated! " + data.username + "'s beer is " + data.temperature + "°" + data.unit + "."; }
+              if (!res.ok) { this.submitError = data.error || "Error."; }
+              else { this.submitSuccess = data.username + ": " + data.temperature + "°" + data.unit; this.fetchRecent(); }
             } catch (e) { this.submitError = "Network error."; }
             this.submitLoading = false;
           },
+          async fetchRecent() {
+            try {
+              const res = await fetch("/api/recent");
+              this.recent = await res.json();
+            } catch (e) {}
+          },
+          init() { this.fetchRecent(); }
         };
       }
     </script>
