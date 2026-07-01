@@ -77,7 +77,7 @@ Bun.serve({
         const body = await req.json().catch(() => ({}));
         const username = (body.username || "").toString().trim().toLowerCase();
         if (!username || !/^[a-z0-9_-]{2,32}$/.test(username)) {
-          return Response.json({ error: "Invalid username. Use 2-32 chars: a-z, 0-9, -, _" }, { status: 400 });
+          return Response.json({ error: "you gotta be chill with this regex: ^[a-z0-9_-]{2,32}$" }, { status: 400 });
         }
 
         const data = pruneExpired(loadData());

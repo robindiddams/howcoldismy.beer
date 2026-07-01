@@ -33,14 +33,14 @@
       th, td { text-align: left; padding: 4px 8px; border-bottom: 1px solid rgba(255,255,255,0.1); }
       th { opacity: 0.6; font-weight: normal; }
       .muted { opacity: 0.5; font-size: 0.85em; }
+      .cold-beer { font-style: italic; font-weight: bold; color: #6bb6ff; }
       .signup { font-size: 1.1em; text-align: center; }
 
-      /* preset buttons */
-      .preset-btn { display: block; width: 100%; text-align: left; padding: 10px 14px; margin-bottom: 4px; font-size: 1em; border: 1px solid rgba(255,255,255,0.3); background: rgba(0,0,0,0.3); color: #fff; cursor: pointer; }
+      .preset-row { display: flex; gap: 4px; flex-wrap: wrap; }
+      .preset-btn { flex: 1; text-align: center; padding: 10px 8px; font-size: 0.9em; border: 1px solid rgba(255,255,255,0.3); background: rgba(0,0,0,0.3); color: #fff; cursor: pointer; }
       .preset-btn:hover { background: rgba(255,255,255,0.2); }
       .preset-btn.selected { background: rgba(255,255,255,0.3); border-color: rgba(255,255,255,0.6); }
 
-      /* animations */
       @keyframes flash {
         0% { opacity: 0; transform: scale(0.8); }
         20% { opacity: 1; transform: scale(1.1); }
@@ -79,38 +79,58 @@
     </style>
   </head>
   <body x-data="beerApp()">
-    <h1>howcoldismy.beer</h1>
-    <p class="muted">How cold is your beer? Share it with the world.</p>
+    <h1>MY BEER IS SO COLD YOU HAVE NO IDEA BRO</h1>
+
+    <!-- Latest checkins -->
+    <h2>whos got <em class="cold-beer">cold beer</em>:</h2>
+    <table>
+      <thead><tr><th>who???</th><th>temp</th><th>when</th></tr></thead>
+      <tbody>
+        <template x-for="row in recent" :key="row.username">
+          <tr>
+            <td><a :href="'/t/' + row.username" x-text="row.username"></a></td>
+            <td>
+              <span x-show="row.preset" x-text="presetLabel(row.preset)"></span>
+              <span x-show="!row.preset" x-text="row.temperature + '°' + row.unit"></span>
+            </td>
+            <td class="muted" x-text="row.ago"></td>
+          </tr>
+        </template>
+        <tr x-show="recent.length === 0"><td colspan="3" class="muted">No checkins yet.</td></tr>
+      </tbody>
+    </table>
 
     <!-- SIGN UP -->
-    <h2 class="signup">👇 SIGN UP RIGHT NOW PLEASE 👇</h2>
+    <h2 class="signup" x-show="!claimed">👇 SIGN UP RIGHT NOW PLEASE 👇</h2>
     <div x-show="!claimed" style="display:flex; gap:4px; flex-wrap:wrap;">
       <input x-model="claimUsername" type="text" placeholder="e.g. coldbeerbro" @keydown.enter="claim()" />
       <button @click="claim()" :disabled="claimLoading">
-        <span x-show="!claimLoading">Claim</span>
+        <span x-show="!claimLoading">I WANT THIS NAME</span>
         <span x-show="claimLoading">...</span>
       </button>
     </div>
     <p class="err" x-show="claimError" x-text="claimError"></p>
 
-    <!-- Radical!! + token + temp picker -->
-    <div x-show="claimed" class="radical" style="margin-top:12px;">
-      <p style="font-size:1.6em; font-weight:bold;">Radical!!</p>
-      <p class="ok">Save this token -- no recovery:</p>
-      <div class="token-row">
-        <div class="token-box" x-text="claimToken"></div>
-        <button @click="copyToken()" x-text="copied ? 'Copied!' : 'Copy'"></button>
-      </div>
+    <!-- Radical!! (on signup) -->
+    <div x-show="claimed && !returningUser" class="radical" style="margin-top:12px;">
+      <p style="font-size:1.6em; font-weight:bold;">🤙 Radical!! 🏄‍♂️</p>
     </div>
 
-    <!-- Checkin: presets + manual -->
-    <div x-show="claimed" style="margin-top:16px;">
-      <h2>Log a checkin</h2>
-      <button id="preset-super-chill" class="preset-btn" @click="submitPreset('super-chill')">Super chill</button>
-      <button id="preset-frigid" class="preset-btn" @click="submitPreset('frigid')">Absolutely Frigid</button>
-      <button id="preset-damn-cold" class="preset-btn" @click="submitPreset('damn-cold')">Damn Cold</button>
+    <!-- SUP (returning user) -->
+    <div x-show="claimed && returningUser" style="margin-top:12px;">
+      <p style="font-size:1.3em; font-weight:bold;">SUP <span style="font-family:monospace;font-weight:normal;background:rgba(0,0,0,0.2);padding:0 4px;" x-text="claimUsername || '&lt;USERNAME&gt;'"></span> whats that beer like?</p>
+    </div>
 
-      <p class="muted" style="margin-top:8px;">...or log a specific temp:</p>
+    <!-- Checkin (only after claim) -->
+    <div x-show="claimed" style="margin-top:16px;">
+      <h2 x-show="returningUser">MY BEER IS:</h2>
+      <h2 x-show="!returningUser">nOW HOW COLD IS THAT BEER?!</h2>
+      <div class="preset-row">
+        <button id="preset-super-chill" class="preset-btn" @click="submitPreset('super-chill')">super chill</button>
+        <button id="preset-frigid" class="preset-btn" @click="submitPreset('frigid')">absolutely frigid</button>
+        <button id="preset-damn-cold" class="preset-btn" @click="submitPreset('damn-cold')">damn cold</button>
+      </div>
+      <p class="muted" style="margin-top:8px;">or give me the digits 📱</p>
       <div style="display:flex; gap:4px; max-width:360px;">
         <input x-model.number="submitTemp" type="number" step="0.1" placeholder="Temp (e.g. 38)" style="flex:1;" />
         <select x-model="submitUnit">
@@ -131,55 +151,24 @@
       cooooooooooooooooooooooooool
     </div>
 
-    <!-- Existing users -->
-    <div x-show="!claimed">
-      <h2>Log a checkin</h2>
-      <div style="display:flex; flex-direction:column; gap:4px; max-width:360px;">
-        <input x-model="submitToken" type="text" placeholder="Token" />
-        <div style="display:flex; gap:4px;">
-          <input x-model.number="submitTemp" type="number" step="0.1" placeholder="Temp (e.g. 38)" style="flex:1;" />
-          <select x-model="submitUnit">
-            <option value="F">F</option>
-            <option value="C">C</option>
-          </select>
-          <button @click="submitTempApi()" :disabled="submitLoading">
-            <span x-show="!submitLoading">Submit</span>
-            <span x-show="submitLoading">...</span>
-          </button>
-        </div>
-      </div>
-      <p class="muted" style="margin-top:8px;">Or use a preset vibe:</p>
-      <button id="preset-super-chill-existing" class="preset-btn" @click="submitPresetExisting('super-chill')">Super chill</button>
-      <button id="preset-frigid-existing" class="preset-btn" @click="submitPresetExisting('frigid')">Absolutely Frigid</button>
-      <button id="preset-damn-cold-existing" class="preset-btn" @click="submitPresetExisting('damn-cold')">Damn Cold</button>
-    </div>
-
-    <!-- Latest checkins -->
-    <h2>Latest checkins</h2>
-    <table>
-      <thead><tr><th>user</th><th>temp</th><th>when</th></tr></thead>
-      <tbody>
-        <template x-for="row in recent" :key="row.username">
-          <tr>
-            <td><a :href="'/t/' + row.username" x-text="row.username"></a></td>
-            <td>
-              <span x-show="row.preset" x-text="presetLabel(row.preset)"></span>
-              <span x-show="!row.preset" x-text="row.temperature + '°' + row.unit"></span>
-            </td>
-            <td class="muted" x-text="row.ago"></td>
-          </tr>
-        </template>
-        <tr x-show="recent.length === 0"><td colspan="3" class="muted">No checkins yet.</td></tr>
-      </tbody>
-    </table>
+    <hr>
 
     <!-- lol wut -->
     <h2>lol wut</h2>
     <ol class="muted">
-      <li>Claim a username, get a token.</li>
-      <li>Log a checkin -- pick a vibe or enter a temp.</li>
-      <li>Share <code>howcoldismy.beer/t/yourname</code> -- it auto-refreshes.</li>
+      <li>get username</li>
+      <li>tell me about ur beer</li>
+      <li>Profit???? ~&gt; <code>howcoldismy.beer/t/yourname</code></li>
     </ol>
+
+    <!-- Token (last) -->
+    <div x-show="claimed" style="margin-top:16px;">
+      <p class="muted">ur token (for the <a href="/llms.txt">api</a> <- dont loose it)</p>
+      <div class="token-row">
+        <div class="token-box" x-text="claimToken"></div>
+        <button @click="copyToken()" x-text="copied ? 'Copied!' : 'Copy'"></button>
+      </div>
+    </div>
 
     <hr>
     <p class="muted">made by <a href="https://github.com/robindiddams">robin</a> and <a href="https://github.com/louthehuman">louie</a> · site updated january 1st 1970</p>
@@ -191,6 +180,7 @@
           claimLoading: false,
           claimError: "",
           claimed: false,
+          returningUser: false,
           claimToken: "",
           submitToken: "",
           submitTemp: null,
@@ -201,9 +191,21 @@
           copied: false,
           coolFlash: false,
           presets: {
-            "super-chill": "Super chill",
-            "frigid": "Absolutely Frigid",
-            "damn-cold": "Damn Cold",
+            "super-chill": "super chill",
+            "frigid": "absolutely frigid",
+            "damn-cold": "damn cold",
+          },
+          init() {
+            const saved = localStorage.getItem("hcb_token");
+            if (saved) {
+              this.submitToken = saved;
+              this.claimToken = saved;
+              this.claimed = true;
+              this.returningUser = true;
+              const savedName = localStorage.getItem("hcb_username");
+              if (savedName) this.claimUsername = savedName;
+            }
+            this.fetchRecent();
           },
           presetLabel(id) { return this.presets[id] || id; },
           async claim() {
@@ -218,6 +220,9 @@
                 this.claimToken = data.token;
                 this.submitToken = data.token;
                 this.claimed = true;
+                this.returningUser = false;
+                localStorage.setItem("hcb_token", data.token);
+                localStorage.setItem("hcb_username", this.claimUsername.trim());
                 this.fetchRecent();
               }
             } catch (e) { this.claimError = "Network error."; }
@@ -244,9 +249,6 @@
             } catch (e) { this.submitError = "Network error."; }
             this.submitLoading = false;
           },
-          async submitPresetExisting(presetId) {
-            this.submitPreset(presetId);
-          },
           async submitTempApi() {
             this.submitError = "";
             if (!this.submitToken || this.submitTemp === null) { this.submitError = "Need token and temp."; return; }
@@ -265,7 +267,6 @@
               if (res.ok) this.recent = await res.json();
             } catch (e) {}
           },
-          init() { this.fetchRecent(); }
         };
       }
     </script>

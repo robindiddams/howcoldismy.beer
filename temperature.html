@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>howcoldismy.beer — Beer Temperature</title>
+    <title>howcoldismy.beer</title>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <style>
       body {
@@ -16,41 +16,18 @@
         margin: 0 auto;
         padding: 24px 16px;
       }
-      h1 { font-size: 1.4em; }
       a { color: #aaf; }
-      .big { font-size: 3em; font-weight: bold; }
-      .msg { font-size: 1.1em; }
-      .small { font-size: 0.85em; opacity: 0.6; }
-      .err { color: #fbb; }
-      .preset-label { font-size: 1.6em; font-weight: bold; }
+      .beer-status { font-size: 1.8em; font-weight: bold; margin-top: 24px; }
+      .muted { opacity: 0.5; font-size: 0.85em; }
     </style>
   </head>
   <body x-data="tempPage()">
-    <p><a href="/">&lt;&lt; back home</a></p>
-
-    <p class="small">beer temperature for</p>
-    <h1 x-text="username"></h1>
-
-    <div x-show="loading">
-      <p>Checking the cold...</p>
+    <div class="beer-status" x-show="!loading && !error">
+      <span x-text="username"></span>'s beer is <span x-text="display"></span>
     </div>
-
-    <div x-show="!loading && !error">
-      <div x-show="preset" class="preset-label" x-text="presetLabel"></div>
-      <div x-show="!preset" class="big" x-text="tempDisplay"></div>
-      <p class="msg" x-text="tempMessage"></p>
-      <p class="small">last updated <span x-text="lastUpdated"></span></p>
-    </div>
-
-    <div x-show="error">
-      <p class="err" x-text="error"></p>
-    </div>
-
-    <div x-show="!loading && !error && temperature === null">
-      <p>No checkin yet. Claim or use your token on the <a href="/">homepage</a>.</p>
-    </div>
-
-    <p class="small" style="margin-top:16px;">auto-refreshes every 5 seconds -- powered by beer -- howcoldismy.beer</p>
+    <div x-show="loading"><p>...</p></div>
+    <div x-show="error"><p x-text="error"></p></div>
+    <p style="margin-top:24px;"><a href="/">&lt;&lt; back home</a></p>
 
     <script>
       function tempPage() {
@@ -61,24 +38,13 @@
           preset: null,
           loading: true,
           error: "",
-          lastUpdated: "",
-          get tempDisplay() {
-            if (this.temperature === null) return "--";
+          get display() {
+            if (this.temperature === null) return "unknown";
+            if (this.preset) {
+              var labels = { "super-chill": "super chill", "frigid": "absolutely frigid", "damn-cold": "damn cold" };
+              return labels[this.preset] || this.temperature + "°" + this.unit;
+            }
             return this.temperature + "°" + this.unit;
-          },
-          get presetLabel() {
-            var labels = { "super-chill": "Super chill", "frigid": "Absolutely Frigid", "damn-cold": "Damn Cold" };
-            return labels[this.preset] || "";
-          },
-          get tempMessage() {
-            if (this.temperature === null) return "";
-            var f = this.unit === "C" ? this.temperature * 9/5 + 32 : this.temperature;
-            if (f < 32) return "That's frozen. Is it even beer anymore?";
-            if (f < 38) return "Ice cold. Perfect.";
-            if (f < 45) return "Nicely chilled. Good to go.";
-            if (f < 55) return "Cool, but not cold enough. Getting there.";
-            if (f < 65) return "Room temperature territory. Put it back in the fridge.";
-            return "That's warm beer. Nobody wants warm beer.";
           },
           init() {
             var parts = window.location.pathname.split("/");
@@ -90,13 +56,12 @@
             try {
               const res = await fetch("/api/temperature/" + this.username);
               const data = await res.json();
-              if (!res.ok) { this.error = data.error || "Could not load temperature."; this.loading = false; return; }
+              if (!res.ok) { this.error = data.error || "not found"; this.loading = false; return; }
               this.temperature = data.temperature;
               this.unit = data.unit || "F";
               this.preset = data.preset || null;
-              if (data.lastSeen) { var d = new Date(data.lastSeen); this.lastUpdated = d.toLocaleString(); }
               this.error = "";
-            } catch (e) { this.error = "Network error."; }
+            } catch (e) { this.error = "network error"; }
             this.loading = false;
           },
         };
