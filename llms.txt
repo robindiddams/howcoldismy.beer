@@ -36,16 +36,16 @@ Human-readable temperature page. Same HTML for all users; Alpine.js fetches data
 
 ## Pages
 
-- / — Homepage with claim form, temperature submission form, and API reference.
+- / — Homepage with claim form and temperature submission form.
 - /t/<username> — Public temperature page for a specific user.
-- /llms.txt — This file.
+- /llms.txt — This file (also serves as the API reference).
 
 ## Tech Stack
 
 - Bun HTTP server (server.ts)
-- Static HTML + Tailwind CSS (CDN) + Alpine.js (CDN)
+- Static HTML + Alpine.js (CDN), no CSS framework
 - data.json for persistence (JSON file storage)
-- No build step, no bundler, no npm dependencies
+- No build step, no bundler
 
 ## Notes
 

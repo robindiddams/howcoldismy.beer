@@ -6,13 +6,22 @@
     <title>howcoldismy.beer — Beer Temperature</title>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <style>
-      body { font-family: monospace; background: #cccccc; color: #000; max-width: 640px; margin: 0 auto; padding: 16px; }
+      body {
+        font-family: monospace;
+        background: linear-gradient(135deg, #5a7a9a 0%, #7a6a9a 50%, #6a8a8a 100%);
+        background-attachment: fixed;
+        min-height: 100vh;
+        color: #fff;
+        max-width: 640px;
+        margin: 0 auto;
+        padding: 16px;
+      }
       h1 { font-size: 1.4em; }
-      a { color: #0000ee; }
+      a { color: #aaf; }
       .big { font-size: 3em; font-weight: bold; }
       .msg { font-size: 1.1em; }
-      .small { font-size: 0.8em; color: #666; }
-      .err { color: #cc0000; }
+      .small { font-size: 0.8em; opacity: 0.6; }
+      .err { color: #fbb; }
     </style>
   </head>
   <body x-data="tempPage()">

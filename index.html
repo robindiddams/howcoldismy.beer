@@ -3,23 +3,32 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>howcoldismy.beer</title>
+    <title>howcoldismy.beer — Is your beer cold enough?</title>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <style>
-      body { font-family: monospace; background: #cccccc; color: #000; max-width: 640px; margin: 0 auto; padding: 16px; }
+      body {
+        font-family: monospace;
+        background: linear-gradient(135deg, #5a7a9a 0%, #7a6a9a 50%, #6a8a8a 100%);
+        background-attachment: fixed;
+        min-height: 100vh;
+        color: #fff;
+        max-width: 640px;
+        margin: 0 auto;
+        padding: 16px;
+      }
       h1 { font-size: 1.6em; }
-      h2 { font-size: 1.1em; margin-top: 1.5em; border-bottom: 1px solid #999; }
-      a { color: #0000ee; }
-      code { background: #ddd; padding: 1px 3px; }
-      input, select, button { font-family: monospace; font-size: 1em; border: 1px solid #999; padding: 4px; background: #fff; }
-      button { cursor: pointer; background: #eee; }
-      button:hover { background: #ddd; }
-      hr { border: none; border-top: 1px solid #999; margin: 1.5em 0; }
-      .token-box { border: 1px solid #999; background: #fff; padding: 8px; word-break: break-all; }
-      .err { color: #cc0000; }
-      .ok { color: #006600; }
-      table { border-collapse: collapse; width: 100%; margin-top: 0.5em; }
-      td { padding: 2px 6px; vertical-align: top; }
+      h2 { font-size: 1.1em; margin-top: 1.5em; }
+      a { color: #aaf; }
+      code { background: rgba(0,0,0,0.3); padding: 1px 4px; }
+      input, select, button { font-family: monospace; font-size: 1em; border: 1px solid rgba(255,255,255,0.3); padding: 5px; background: rgba(0,0,0,0.3); color: #fff; }
+      input::placeholder { color: rgba(255,255,255,0.4); }
+      button { cursor: pointer; background: rgba(255,255,255,0.15); }
+      button:hover { background: rgba(255,255,255,0.25); }
+      button:disabled { opacity: 0.5; }
+      hr { border: none; border-top: 1px solid rgba(255,255,255,0.2); margin: 1.5em 0; }
+      .token-box { border: 1px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.35); padding: 8px; word-break: break-all; }
+      .err { color: #fbb; }
+      .ok { color: #bfb; }
     </style>
   </head>
   <body x-data="beerApp()">
@@ -46,7 +55,7 @@
     <div x-show="claimSuccess" style="margin-top:8px;">
       <p class="ok">Username claimed! Here's your token -- <strong>save it</strong>, there's no recovery:</p>
       <div class="token-box" x-text="claimToken"></div>
-      <p>Now submit a temperature using the API or the form below:</p>
+      <p>Now submit a temperature using the form below:</p>
       <p><a :href="'/t/' + claimUsername.toLowerCase()">View your temperature page &gt;&gt;</a></p>
     </div>
 
@@ -69,17 +78,10 @@
     <p class="err" x-show="submitError" x-text="submitError"></p>
     <p class="ok" x-show="submitSuccess" x-text="submitSuccess"></p>
 
-    <h2>API Reference</h2>
-    <table>
-      <tr><td><code>POST /api/claim</code></td><td>Body: <code>{"username":"yourname"}</code> -- Returns: <code>{"username","token"}</code></td></tr>
-      <tr><td><code>POST /api/temperature</code></td><td>Body: <code>{"token":"...","temperature":38,"unit":"F"}</code></td></tr>
-      <tr><td><code>GET /api/temperature/&lt;username&gt;</code></td><td>Returns the current temperature for a user.</td></tr>
-      <tr><td><code>GET /t/&lt;username&gt;</code></td><td>Human-readable temperature page. Auto-refreshes.</td></tr>
-    </table>
-    <p style="font-size:0.8em; color:#666;">Tokens expire if unused for 8 days. Claim again if that happens.</p>
+    <p style="font-size:0.8em; opacity:0.6; margin-top:1em;">Tokens expire if unused for 8 days. Claim again if that happens.</p>
 
     <hr>
-    <p style="font-size:0.9em;">
+    <p style="font-size:0.9em; opacity:0.7;">
       A site by <a href="https://github.com/robindiddams">robin diddams</a> and <a href="https://github.com/louthehuman">louie</a>.<br>
       robin is a 1000000x engineer, thought leader, total rockstar developer, southwest rapidrewards member. spotted wearing scrubs.<br>
       <span style="font-size:0.8em;">site updated january 1st 1970</span>
